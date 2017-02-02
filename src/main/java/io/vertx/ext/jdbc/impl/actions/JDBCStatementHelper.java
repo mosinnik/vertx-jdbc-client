@@ -234,6 +234,38 @@ public final class JDBCStatementHelper {
       }
     }
 
+    // lists
+    if (value instanceof List) {
+      List a = (List) value;
+      try {
+        JsonArray jsonArray = new JsonArray();
+        for (Object o : a) {
+          jsonArray.add(convertSqlValue(o));
+        }
+        return jsonArray;
+      } finally {
+        a.clear();
+      }
+    }
+
+    // maps
+    if (value instanceof Map) {
+      Map<Object, Object> a = (Map<Object, Object>) value;
+      try {
+        JsonObject obj = new JsonObject();
+        for(Map.Entry<Object, Object> entry : a.entrySet()) {
+          if(entry.getKey() == null) {
+             obj.put("null", convertSqlValue(entry.getValue()));
+           } else {
+             obj.put(entry.getKey().toString(), convertSqlValue(entry.getValue()));
+           }
+        }
+        return obj;
+      } finally {
+        a.clear();
+      }
+    }
+
     // fallback to String
     return value.toString();
   }
